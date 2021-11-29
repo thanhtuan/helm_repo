@@ -1,0 +1,122 @@
+# Default values for fti-cm-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: ${REGISTRY_URL}${REGISTRY_URI}
+  pullPolicy: IfNotPresent
+
+imagePullSecrets:
+  - name: isc-registry-secret
+nameOverride: ""
+fullnameOverride: ""
+
+hostAliases:
+  - ip: 172.20.17.66
+    hostnames:
+    - "isc-kafka01"
+  - ip: 172.20.17.67
+    hostnames:
+    - "isc-kafka02"
+  - ip: 172.20.17.68
+    hostnames:
+    - "isc-kafka03"
+  - ip: 172.20.18.32
+    hostnames:
+    - "iam.fpt.net"
+  - ip: 172.20.16.60
+    hostnames:
+    - "prdb-par01"
+  - ip: 172.20.16.61
+    hostnames:
+    - "prdb-par02"
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name:
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 2000
+
+service:
+  type: ClusterIP
+  port: 80
+
+environment:
+  - name: NODEJS_ENVIRONMENT
+    value: "Production"
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: fsm.fpt.vn
+      paths:
+        - /
+        - /itsm
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+livenessProbe: []
+  # httpGet:
+  #   path: /
+  #   port: http
+  # initialDelaySeconds: 10
+  # periodSeconds: 1
+  # timeoutSeconds: 5
+  # successThreshold: 1
+  # failureThreshold: 2
+readinessProbe: []
+  # httpGet:
+  #   path: /
+  #   port: http
+  # initialDelaySeconds: 15
+  # periodSeconds: 1
+  # timeoutSeconds: 5
+  # successThreshold: 1
+  # failureThreshold: 2
+resources:
+  limits:
+    cpu: 1
+    memory: 1Gi
+  requests:
+    # cpu: 50m
+    # memory: 128Mi
+    #prodenv
+    cpu: 100m
+    memory: 512Mi
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 4
+  metrics:
+    cpu:
+      #(limits.cpu * %) / requests.cpu * 100
+      averageUtilization: 800
+    memory:
+      #(limits.memory * %) / requests.memory * 100
+      averageUtilization: 160
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
