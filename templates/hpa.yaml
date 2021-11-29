@@ -1,0 +1,28 @@
+{{- if .Values.hpa.enabled -}}
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "isc-k8s-service.fullname" . }}
+  labels:
+    {{- include "isc-k8s-service.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "isc-k8s-service.fullname" . }}
+  minReplicas: {{ .Values.hpa.minReplicas }}
+  maxReplicas: {{ .Values.hpa.maxReplicas }}
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      target:
+        averageUtilization: {{ .Values.hpa.metrics.memory.averageUtilization }}
+        type: Utilization
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        averageUtilization: {{ .Values.hpa.metrics.cpu.averageUtilization }}
+        type: Utilization
+{{- end }}
